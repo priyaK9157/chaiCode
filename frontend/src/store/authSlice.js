@@ -23,7 +23,7 @@ export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch('https://chaicode-q85o.onrender.com/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
@@ -40,7 +40,7 @@ export const verifySignupOtp = createAsyncThunk(
   'auth/verifySignupOtp',
   async ({ email, otp }, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/verify-signup', {
+      const response = await fetch('https://chaicode-q85o.onrender.com/api/auth/verify-signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -62,7 +62,7 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('https://chaicode-q85o.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
@@ -86,7 +86,7 @@ export const deleteProfile = createAsyncThunk(
   async (_, { rejectWithValue, getState }) => {
     try {
       const { auth } = getState();
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
+      const response = await fetch('https://chaicode-q85o.onrender.com/api/auth/profile', {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${auth.token}` },
       });
@@ -109,7 +109,7 @@ export const forgotPassword = createAsyncThunk(
   'auth/forgotPassword',
   async (email, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+      const response = await fetch('https://chaicode-q85o.onrender.com/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -126,7 +126,7 @@ export const verifyOtp = createAsyncThunk(
   'auth/verifyOtp',
   async ({ email, otp }, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
+      const response = await fetch('https://chaicode-q85o.onrender.com/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -143,7 +143,7 @@ export const resetPassword = createAsyncThunk(
   'auth/resetPassword',
   async ({ email, newPassword }, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/reset-password', {
+      const response = await fetch('https://chaicode-q85o.onrender.com/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, newPassword }),

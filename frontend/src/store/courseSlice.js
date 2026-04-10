@@ -5,7 +5,7 @@ export const fetchCourseById = createAsyncThunk(
   'courses/fetchById',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/courses/${id}`);
+      const response = await fetch(`https://chaicode-1.onrender.com/api/courses/${id}`);
       if (!response.ok) {
         throw new Error('Server error!');
       }
@@ -21,7 +21,7 @@ export const fetchAllCourses = createAsyncThunk(
   'courses/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:5000/api/courses');
+      const response = await fetch('https://chaicode-1.onrender.com/api/courses');
       if (!response.ok) {
         throw new Error('Server error!');
       }
