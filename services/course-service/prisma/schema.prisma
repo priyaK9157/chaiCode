@@ -1,0 +1,50 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Course {
+  id           String    @id @default(uuid())
+  title        String
+  description  String?
+  price        Float?
+  thumbnailUrl String?
+  isPublished  Boolean   @default(false)
+  instructorId String
+  sections     Section[]
+  createdAt    DateTime  @default(now())
+  enrollments  Enrollment[]
+}
+
+model Section {
+  id       String   @id @default(uuid())
+  title    String
+  courseId String
+  course   Course   @relation(fields: [courseId], references: [id])
+  lessons  Lesson[]
+  order    Int      @default(0)
+}
+
+model Lesson {
+  id        String  @id @default(uuid())
+  title     String
+  videoUrl  String
+  duration  Int
+  order     Int     @default(0)
+  isPreview Boolean @default(false)
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id])
+}
+
+model Enrollment {
+  id        String   @id @default(uuid())
+  studentId String
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  status    String   @default("COMPLETED")
+  createdAt DateTime @default(now())
+}
