@@ -1,7 +1,6 @@
 import Navbar from "../common/Navbar"
 import BackgroundImage from "../common/BackgroundImage";
 import Profile from "../common/GithubProfile"
-import Footer from "./Footer"
 
 const Reviews = () => {
     return (

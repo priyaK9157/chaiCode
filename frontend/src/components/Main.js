@@ -5,8 +5,8 @@ import {useState} from "react"
 
 const Main = ({images, images1}) => {
 
-    const [visibleImage, setVisibleImage] = useState(0);
-    const [cohortImage, setCohortImage] = useState(0)
+    const [visibleImage] = useState(0);
+    // const [cohortImage, setCohortImage] = useState(0)
 
     return <div className='px-28 '>
     

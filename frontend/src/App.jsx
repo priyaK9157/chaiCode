@@ -23,7 +23,7 @@ import PaymentCancel from "./components/PaymentCancel";
 import InstructorCourseDetails from "./components/InstructorCourseDetails";
 
 function App() {
-  const [visibleImage, setVisibleImage] = useState(0);
+  // const [visibleImage, setVisibleImage] = useState(0);
   const images = [
     "https://chaicode.com/assets/black-3-Bm-S1mSe.webp",
     "https://chaicode.com/assets/white-3-CGLYt1t0.webp",
@@ -42,7 +42,7 @@ function App() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setVisibleImage((prev) => (prev+1) % images.length)
+      // setVisibleImage((prev) => (prev+1) % images.length)
     }, 3000)
     return () => clearInterval(interval);
   }, [images.length]);

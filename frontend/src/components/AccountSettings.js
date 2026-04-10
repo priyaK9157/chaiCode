@@ -1,18 +1,17 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { clearError, deleteProfile } from "../store/authSlice";
+import { deleteProfile } from "../store/authSlice";
 import BackgroundImage from "../common/BackgroundImage";
 import Navbar from "../common/Navbar";
 
 const AccountSettings = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { user, loading, error, token } = useSelector((state) => state.auth);
+    const { user, token } = useSelector((state) => state.auth);
 
     const handleUpdatePassword = async (e) => {
         e.preventDefault();
