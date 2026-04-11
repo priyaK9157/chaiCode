@@ -15,7 +15,7 @@ const InstructorDashboard = () => {
         // In a real app, this would come from an AuthContext/Token
         const fetchInstructorCourses = async () => {
             try {
-                const response = await fetch("http://localhost:5000/api/courses/instructor", {
+                const response = await fetch("https://chaicode-1.onrender.com/api/courses/instructor", {
                     headers: {
                         "Authorization": `Bearer ${token}`
                     }
