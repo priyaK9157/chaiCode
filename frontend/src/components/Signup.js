@@ -260,7 +260,7 @@ const Signup = () => {
                                 className="text-white font-bold cursor-pointer hover:text-orange-400 transition-colors"
                                 onClick={async () => {
                                     try {
-                                        const res = await fetch("http://localhost:5000/api/auth/resend-signup-otp", {
+                                        const res = await fetch("https://chaicode-q85o.onrender.com/api/auth/resend-signup-otp", {
                                             method: "POST",
                                             headers: { "Content-Type": "application/json" },
                                             body: JSON.stringify({ email: userData.email }),
