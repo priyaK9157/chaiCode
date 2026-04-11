@@ -55,7 +55,7 @@ const InstructorCourseDetails = () => {
         e.preventDefault();
         setActionLoading(true);
         try {
-            const res = await fetch(`https://chai-code-puce.vercel.app/api/courses/${courseId}`, {
+            const res = await fetch(`https://chaicode-1.onrender.com/api/courses/${courseId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -81,7 +81,7 @@ const InstructorCourseDetails = () => {
     const handleDeleteCourse = async () => {
         setActionLoading(true);
         try {
-            const res = await fetch(`https://chai-code-puce.vercel.app/api/courses/${courseId}`, {
+            const res = await fetch(`https://chaicode-1.onrender.com/api/courses/${courseId}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -105,7 +105,7 @@ const InstructorCourseDetails = () => {
         setActionLoading(true);
         try {
             const nextOrder = (courseData?.sections?.length || 0) + 1;
-            const res = await fetch("https://chai-code-puce.vercel.app/api/sections", {
+            const res = await fetch("https://chaicode-1.onrender.com/api/sections", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -132,7 +132,7 @@ const InstructorCourseDetails = () => {
     const handleDeleteSection = async (sectionId) => {
         if (!window.confirm("Are you sure you want to delete this section and all its lessons?")) return;
         try {
-            const res = await fetch(`https://chai-code-puce.vercel.app/api/sections/${sectionId}`, {
+            const res = await fetch(`https://chaicode-1.onrender.com/api/sections/${sectionId}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
