@@ -5,6 +5,8 @@ import { protect } from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 router.post("/checkout-session", protect, paymentController.createCheckoutSession);
+router.post("/confirm-payment", protect, paymentController.confirmPayment);
+router.get("/check-enrollment/:courseId", protect, paymentController.checkEnrollmentStatus);
 router.post("/webhook", express.raw({ type: "application/json" }), paymentController.handleWebhook);
 
 export default router;
