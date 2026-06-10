@@ -20,7 +20,7 @@ const Description = () => {
     const dispatch = useDispatch();
     const [expand, setExpand] = useState(false);
     const [openSections, setOpenSections] = useState({});
-    const [enrolling, setEnrolling] = useState(false);
+    const enrolling = false;
     const [isEnrolled, setIsEnrolled] = useState(false);
     const [checkingEnrollment, setCheckingEnrollment] = useState(false);
 

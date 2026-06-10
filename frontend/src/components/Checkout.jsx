@@ -5,7 +5,6 @@ import { fetchCourseById } from "../store/courseSlice";
 import Navbar from "../common/Navbar";
 import BackgroundImage from "../common/BackgroundImage";
 import { HiCreditCard, HiCalendar, HiLockClosed, HiUser, HiArrowLeft } from "react-icons/hi";
-import { API_BASE_URL } from "../config";
 
 const Checkout = () => {
   const { courseId } = useParams();
