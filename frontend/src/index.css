@@ -60,3 +60,107 @@
 ::-webkit-scrollbar-thumb {
   @apply bg-neutral-800 rounded-full border-2 border-black hover:bg-neutral-700 transition-colors;
 }
+
+/* Global Media Queries for Responsiveness */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px !important;
+  }
+  
+  h1 {
+    font-size: 2rem !important; /* Scale down hero titles */
+    line-height: 2.25rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+
+  h3 {
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+  }
+
+  p {
+    font-size: 0.875rem !important; /* Scale paragraph text */
+  }
+
+  /* Force responsive margins, paddings, and gaps on mobile screens */
+  .px-28, .px-12, .px-10, .px-8, .px-6 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .py-32, .py-20, .py-12, .py-10 {
+    padding-top: 2.5rem !important;
+    padding-bottom: 2.5rem !important;
+  }
+
+  .pt-32, .pt-24, .pt-40 {
+    padding-top: 6rem !important;
+  }
+
+  .pb-20 {
+    padding-bottom: 3rem !important;
+  }
+
+  .mt-32, .mt-24, .mt-20, .mt-16 {
+    margin-top: 2rem !important;
+  }
+
+  .gap-16, .gap-12, .gap-10, .gap-8 {
+    gap: 1.25rem !important;
+  }
+
+  /* Adapt buttons for small screens */
+  .btn-primary {
+    padding: 0.75rem 1.25rem !important;
+    font-size: 0.875rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  /* Input fields sizing for mobile */
+  .input-field {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  body {
+    font-size: 15px !important;
+  }
+
+  h1 {
+    font-size: 2.75rem !important;
+    line-height: 3rem !important;
+  }
+
+  h2 {
+    font-size: 2rem !important;
+    line-height: 2.5rem !important;
+  }
+
+  h3 {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+
+  /* Padding adjustments for tablet sizes */
+  .px-28 {
+    padding-left: 2.5rem !important;
+    padding-right: 2.5rem !important;
+  }
+
+  .px-12 {
+    padding-left: 1.75rem !important;
+    padding-right: 1.75rem !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  body {
+    font-size: 16px !important;
+  }
+}

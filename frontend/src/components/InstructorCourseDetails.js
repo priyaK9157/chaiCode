@@ -87,7 +87,7 @@ const InstructorCourseDetails = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (res.ok) {
-                navigate("/instructor");
+                navigate("/instructor")
             } else {
                 const data = await res.json();
                 alert(data.message || "Failed to delete course");
