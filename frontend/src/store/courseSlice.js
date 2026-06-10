@@ -1,11 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { API_BASE_URL } from '../config';
 
 // Async thunk to fetch course by ID
 export const fetchCourseById = createAsyncThunk(
   'courses/fetchById',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await fetch(`https://chaicode-1.onrender.com/api/courses/${id}`);
+      const response = await fetch(`${API_BASE_URL}/api/courses/${id}`);
       if (!response.ok) {
         throw new Error('Server error!');
       }
@@ -21,7 +22,7 @@ export const fetchAllCourses = createAsyncThunk(
   'courses/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('https://chaicode-1.onrender.com/api/courses');
+      const response = await fetch(`${API_BASE_URL}/api/courses`);
       if (!response.ok) {
         throw new Error('Server error!');
       }

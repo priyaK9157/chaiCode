@@ -4,7 +4,7 @@ import { FaLinkedin, FaInstagramSquare } from "react-icons/fa";
 
 const Footer = () => {
     return (
-        <div className="bg-black text-neutral-300 flex justify-between py-8 px-28 open-sans">
+        <div className="bg-black text-neutral-300 flex flex-col lg:flex-row justify-between py-12 px-6 md:px-12 lg:px-28 open-sans gap-12 lg:gap-0">
             <div className="flex flex-col gap-16">
                 <div>
                     <a href="/">
@@ -23,7 +23,7 @@ const Footer = () => {
                 </div>
             </div>
 
-            <div className="flex justify-evenly gap-16">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16">
                 <div className="flex flex-col gap-2">
                     <p className="font-semibold">Products</p>
                     <p className="text-neutral-400">Courses</p>

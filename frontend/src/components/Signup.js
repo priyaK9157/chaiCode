@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { registerUser, verifySignupOtp } from "../store/authSlice";
+import { API_BASE_URL } from "../config";
 
 const Signup = () => {
     const [userData, setUserData] = useState({
@@ -260,7 +261,7 @@ const Signup = () => {
                                 className="text-white font-bold cursor-pointer hover:text-orange-400 transition-colors"
                                 onClick={async () => {
                                     try {
-                                        const res = await fetch("https://chaicode-q85o.onrender.com/api/auth/resend-signup-otp", {
+                                        const res = await fetch(`${API_BASE_URL}/api/auth/resend-signup-otp`, {
                                             method: "POST",
                                             headers: { "Content-Type": "application/json" },
                                             body: JSON.stringify({ email: userData.email }),

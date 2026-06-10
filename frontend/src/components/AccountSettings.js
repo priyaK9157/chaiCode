@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { deleteProfile } from "../store/authSlice";
 import BackgroundImage from "../common/BackgroundImage";
 import Navbar from "../common/Navbar";
+import { API_BASE_URL } from "../config";
 
 const AccountSettings = () => {
     const [password, setPassword] = useState("");
@@ -18,7 +19,7 @@ const AccountSettings = () => {
         if (password !== confirmPassword) return alert("Passwords do not match");
 
         try {
-            const response = await fetch("https://chaicode-q85o.onrender.com/api/auth/reset-password", {
+            const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
                 method: "POST",
                 headers: { 
                     "Content-Type": "application/json",

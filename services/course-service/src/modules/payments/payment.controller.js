@@ -2,7 +2,7 @@ import * as paymentService from "./payment.service.js";
 import * as enrollmentService from "../enrollments/enrollment.service.js";
 import * as courseService from "../courses/course.service.js";
 import stripe from "../../config/stripe.js";
-import env from "../../config/env.js";
+import env from "../../config/env.js"
 
 export const createCheckoutSession = async (req, res) => {
   try {

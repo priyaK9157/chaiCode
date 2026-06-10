@@ -59,18 +59,22 @@ const image = [
   ];
 
   return (
-    <div className="flex flex-col gap-5 px-28 py-20">
+    <div className="flex flex-col gap-5 px-6 md:px-12 lg:px-28 py-10 md:py-20">
         <h1 className="text-white text-3xl">Interview Preparation</h1>
         <p className="text-lg text-neutral-400">Build job-ready skills with our <span className="text-orange-100 text-lg">comprehensive interview preparation bundle</span> that includes multiple courses like</p>
       {/* Slider Wrapper */}
-      <div className=" w-[1000px] mx-auto">
+      <div className="w-full max-w-6xl mx-auto">
         <Swiper
           modules={[Navigation]} 
           spaceBetween={50}
-          slidesPerView={3}
+          slidesPerView={1}
+          breakpoints={{
+            640: { slidesPerView: 2, spaceBetween: 30 },
+            1024: { slidesPerView: 3, spaceBetween: 50 },
+          }}
           navigation={{
-            nextEl: ".custom-next",
-            prevEl: ".custom-prev",
+            nextEl: ".interview-next",
+            prevEl: ".interview-prev",
           }}
         >
           {image.map((img, index) => (
@@ -92,10 +96,10 @@ const image = [
 
       {/* Custom Buttons */}
       <div className="flex gap-4 text-neutral-500 justify-end">
-        <button className="custom-prev border border-gray-800 rounded-full transition-transform duration-300 hover:scale-105 cursor-pointer">
+        <button className="interview-prev border border-gray-800 rounded-full transition-transform duration-300 hover:scale-105 cursor-pointer p-1">
           <MdOutlineKeyboardArrowLeft size={30} />
         </button>
-        <button className="custom-next border border-gray-800 rounded-full transition-transform duration-300 hover:scale-105 cursor-pointer">
+        <button className="interview-next border border-gray-800 rounded-full transition-transform duration-300 hover:scale-105 cursor-pointer p-1">
           <MdKeyboardArrowRight size={30} />
         </button>
       </div>

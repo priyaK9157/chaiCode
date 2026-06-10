@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCourseById, clearSelectedCourse } from "../store/courseSlice";
 import { HiArrowLeft, HiPlus, HiPencil, HiTrash, HiOutlinePlay, HiX } from "react-icons/hi";
+import { API_BASE_URL } from "../config";
 
 const InstructorCourseDetails = () => {
     const { id: courseId } = useParams();
@@ -55,7 +56,7 @@ const InstructorCourseDetails = () => {
         e.preventDefault();
         setActionLoading(true);
         try {
-            const res = await fetch(`https://chaicode-1.onrender.com/api/courses/${courseId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -81,7 +82,7 @@ const InstructorCourseDetails = () => {
     const handleDeleteCourse = async () => {
         setActionLoading(true);
         try {
-            const res = await fetch(`https://chaicode-1.onrender.com/api/courses/${courseId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -105,7 +106,7 @@ const InstructorCourseDetails = () => {
         setActionLoading(true);
         try {
             const nextOrder = (courseData?.sections?.length || 0) + 1;
-            const res = await fetch("https://chaicode-1.onrender.com/api/sections", {
+            const res = await fetch(`${API_BASE_URL}/api/sections`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -132,7 +133,7 @@ const InstructorCourseDetails = () => {
     const handleDeleteSection = async (sectionId) => {
         if (!window.confirm("Are you sure you want to delete this section and all its lessons?")) return;
         try {
-            const res = await fetch(`https://chaicode-1.onrender.com/api/sections/${sectionId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/sections/${sectionId}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -170,7 +171,7 @@ const InstructorCourseDetails = () => {
             <BackgroundImage />
             <Navbar />
 
-            <div className="pt-32 px-8 lg:px-28">
+            <div className="pt-32 px-6 md:px-12 lg:px-28">
                 <button 
                     onClick={() => navigate("/instructor")}
                     className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8 font-semibold uppercase tracking-wider text-sm"
@@ -205,7 +206,7 @@ const InstructorCourseDetails = () => {
                             <p className="text-gray-400 text-lg line-clamp-3">{courseData.description}</p>
                         </div>
                         
-                        <div className="mt-6 pt-6 border-t border-white/10 flex gap-4">
+                        <div className="mt-6 pt-6 border-t border-white/10 flex flex-wrap gap-4">
                             <button
                                 onClick={() => setShowEditModal(true)}
                                 className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-bold transition-colors"
@@ -223,7 +224,7 @@ const InstructorCourseDetails = () => {
                 </div>
 
                 {/* Syllabus / Content Section */}
-                <div className="flex justify-between items-end mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
                     <div>
                         <h2 className="text-3xl font-black text-white">Course Curriculum</h2>
                         <p className="text-gray-400 mt-2">Organize your course into sections and lessons.</p>

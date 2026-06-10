@@ -4,6 +4,7 @@ import BackgroundImage from "../common/BackgroundImage";
 import { Link } from "react-router-dom";
 import { HiPlus } from "react-icons/hi";
 import { useSelector } from "react-redux";
+import { API_BASE_URL } from "../config";
 
 const InstructorDashboard = () => {
     const [courses, setCourses] = useState([]);
@@ -15,7 +16,7 @@ const InstructorDashboard = () => {
         // In a real app, this would come from an AuthContext/Token
         const fetchInstructorCourses = async () => {
             try {
-                const response = await fetch("https://chaicode-1.onrender.com/api/courses/instructor", {
+                const response = await fetch(`${API_BASE_URL}/api/courses/instructor`, {
                     headers: {
                         "Authorization": `Bearer ${token}`
                     }
@@ -40,8 +41,8 @@ const InstructorDashboard = () => {
             <BackgroundImage />
             <Navbar />
 
-            <div className="pt-32 px-8 lg:px-28">
-                <div className="flex justify-between items-center mb-12">
+            <div className="pt-32 px-6 md:px-12 lg:px-28">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12">
                     <div>
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-red-600 bg-clip-text text-transparent">
                             Instructor Dashboard

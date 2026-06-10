@@ -4,6 +4,7 @@ import BackgroundImage from "../common/BackgroundImage";
 import { useNavigate } from "react-router-dom";
 import { HiArrowLeft } from "react-icons/hi";
 import { useSelector } from "react-redux";
+import { API_BASE_URL } from "../config";
 
 const AddCourse = () => {
     const navigate = useNavigate();
@@ -49,7 +50,7 @@ const AddCourse = () => {
                 data.append("thumbnail", thumbnail);
             }
 
-            const response = await fetch("https://chaicode-1.onrender.com/api/courses", {
+            const response = await fetch(`${API_BASE_URL}/api/courses`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`

@@ -23,21 +23,25 @@ const Cohort = () => {
     const defaultThumb = "https://chaicode.com/assets/piyush-hitesh-dark-CQ8g4eJE.webp";
 
   return (
-    <div className="flex flex-col gap-5 px-28 py-20">
+    <div className="flex flex-col gap-5 px-6 md:px-12 lg:px-28 py-10 md:py-20">
         <h1 className="text-white text-3xl">Our Cohorts</h1>
         <p className="text-lg text-neutral-400">Learn in engaging <span className="text-orange-100 text-lg">Live classes</span>, collaborate with peers, share ideas, and grow together as part of a vibrant learning community.</p>
       
       {loading && <div className="text-white text-center">Loading courses...</div>}
       
       {/* Slider Wrapper */}
-      <div className=" w-[1000px] mx-auto">
+      <div className="w-full max-w-6xl mx-auto">
         <Swiper
           modules={[Navigation]}
           spaceBetween={50}
-          slidesPerView={3}
+          slidesPerView={1}
+          breakpoints={{
+            640: { slidesPerView: 2, spaceBetween: 30 },
+            1024: { slidesPerView: 3, spaceBetween: 50 },
+          }}
           navigation={{
-            nextEl: ".custom-next",
-            prevEl: ".custom-prev",
+            nextEl: ".cohort-next",
+            prevEl: ".cohort-prev",
           }}
         >
           {courses.map((course) => (
@@ -67,10 +71,10 @@ const Cohort = () => {
 
       {/* Custom Buttons */}
       <div className="flex gap-4 text-neutral-500 justify-end">
-        <button className="custom-prev border border-gray-800 rounded-full transition-transform duration-300 hover:scale-105 cursor-pointer">
+        <button className="cohort-prev border border-gray-800 rounded-full transition-transform duration-300 hover:scale-105 cursor-pointer p-1">
           <MdOutlineKeyboardArrowLeft size={30} />
         </button>
-        <button className="custom-next border border-gray-800 rounded-full transition-transform duration-300 hover:scale-105 cursor-pointer">
+        <button className="cohort-next border border-gray-800 rounded-full transition-transform duration-300 hover:scale-105 cursor-pointer p-1">
           <MdKeyboardArrowRight size={30} />
         </button>
       </div>

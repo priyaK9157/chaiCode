@@ -21,6 +21,7 @@ import AddCourse from "./components/AddCourse";
 import PaymentSuccess from "./components/PaymentSuccess";
 import PaymentCancel from "./components/PaymentCancel";
 import InstructorCourseDetails from "./components/InstructorCourseDetails";
+import Checkout from "./components/Checkout";
 
 function App() {
   // const [visibleImage, setVisibleImage] = useState(0);
@@ -75,6 +76,7 @@ function App() {
          <Route path="/instructor/course/:id" element={<InstructorCourseDetails />} />
          <Route path="/instructor/add-course" element={<AddCourse />} />
          <Route path="/cohort/:id" element={<Description />} />
+         <Route path="/checkout/:courseId" element={<Checkout />} />
          <Route path="/payment/success" element={<PaymentSuccess />} />
          <Route path="/payment/cancel" element={<PaymentCancel />} />
        </Routes>

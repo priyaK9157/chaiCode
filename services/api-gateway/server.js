@@ -13,8 +13,8 @@ app.get('/', (req, res) => {
 });
 
 // Proxy logic
-const targetAuth = process.env.TARGET_AUTH || 'http://localhost:5001';
-const targetCourse = process.env.TARGET_COURSE || 'http://localhost:5002';
+const targetAuth = process.env.TARGET_AUTH || 'https://chaicode-3.onrender.com';
+const targetCourse = process.env.TARGET_COURSE || 'https://chaicode-5.onrender.com';
 
 // Proxy requests starting with /api/auth to the Auth Service
 app.use(createProxyMiddleware('/api/auth', {
