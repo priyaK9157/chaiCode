@@ -17,6 +17,8 @@ import ForgotPassword from "./components/ForgotPassword"
 import ResetPassword from "./components/ResetPassword"
 import AccountSettings from "./components/AccountSettings"
 import InstructorDashboard from "./components/InstructorDashboard";
+import Dashboard from "./components/Dashboard";
+import CoursePlayer from "./components/CoursePlayer";
 import AddCourse from "./components/AddCourse";
 import PaymentSuccess from "./components/PaymentSuccess";
 import PaymentCancel from "./components/PaymentCancel";
@@ -72,6 +74,8 @@ function App() {
          <Route path="/cohorts" element={<Cohort />} />
          <Route path="/interview" element={<Interview />} />
          <Route path="/reviews" element={<Reviews />} />
+         <Route path="/dashboard" element={<Dashboard />} />
+         <Route path="/course/:courseId/learn" element={<CoursePlayer />} />
          <Route path="/instructor" element={<InstructorDashboard />} />
          <Route path="/instructor/course/:id" element={<InstructorCourseDetails />} />
          <Route path="/instructor/add-course" element={<AddCourse />} />

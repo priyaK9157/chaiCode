@@ -97,3 +97,27 @@ export const deleteCourse = async (id) => {
   await prisma.enrollment.deleteMany({ where: { courseId: id } });
   return prisma.course.delete({ where: { id } });
 };
+
+export const getEnrolledCourses = async (studentId) => {
+  const enrollments = await prisma.enrollment.findMany({
+    where: {
+      studentId,
+      status: "COMPLETED",
+    },
+    include: {
+      course: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          price: true,
+          thumbnailUrl: true,
+          isPublished: true,
+          instructorId: true,
+          createdAt: true
+        }
+      }
+    }
+  });
+  return enrollments.map((e) => e.course);
+};

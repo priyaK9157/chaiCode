@@ -1,5 +1,6 @@
 import * as lessonService from "./lesson.service.js";
 import { getSectionById } from "../sections/section.service.js";
+import { checkEnrollment } from "../enrollments/enrollment.service.js";
 
 export const createLesson = async (req, res, next) => {
   try {
@@ -71,6 +72,39 @@ export const deleteLesson = async (req, res, next) => {
 
     await lessonService.deleteLesson(id);
     res.json({ message: "Lesson deleted successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getLesson = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const lesson = await lessonService.getLessonById(id);
+
+    if (!lesson) {
+      return res.status(404).json({ message: "Lesson not found" });
+    }
+
+    const courseId = lesson.section.course.id;
+
+    // 1. If user is the instructor who owns the course, allow
+    if (lesson.section.course.instructorId === req.user.id) {
+      return res.json(lesson);
+    }
+
+    // 2. If lesson is a preview, allow
+    if (lesson.isPreview) {
+      return res.json(lesson);
+    }
+
+    // 3. Otherwise, check enrollment
+    const isEnrolled = await checkEnrollment(req.user.id, courseId);
+    if (!isEnrolled) {
+      return res.status(403).json({ message: "You are not enrolled in this course" });
+    }
+
+    res.json(lesson);
   } catch (err) {
     next(err);
   }

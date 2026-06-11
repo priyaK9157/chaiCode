@@ -75,3 +75,12 @@ export const deleteCourse = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getEnrolledCourses = async (req, res, next) => {
+  try {
+    const courses = await courseService.getEnrolledCourses(req.user.id);
+    res.json(courses);
+  } catch (err) {
+    next(err);
+  }
+};

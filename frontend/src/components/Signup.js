@@ -66,12 +66,8 @@ const Signup = () => {
         }
 
         try {
-            const res = await dispatch(verifySignupOtp({ email: userData.email, otp })).unwrap();
-            if (res.user?.role === "INSTRUCTOR") {
-                navigate("/instructor");
-            } else {
-                navigate("/");
-            }
+            await dispatch(verifySignupOtp({ email: userData.email, otp })).unwrap();
+            navigate("/dashboard");
         } catch (err) {
             console.error(err);
         }

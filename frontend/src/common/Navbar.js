@@ -29,8 +29,8 @@ const Navbar = () => {
           <li className="hover:text-white cursor-pointer transition-colors"><Link to="/">Home</Link></li>
           <li className="hover:text-white cursor-pointer transition-colors"><Link to="/cohorts">Cohorts</Link></li>
           <li className="hover:text-white cursor-pointer transition-colors"><Link to="/reviews">Reviews</Link></li>
-          {user?.role === "INSTRUCTOR" && (
-            <li className="hover:text-orange-400 cursor-pointer transition-colors text-orange-500"><Link to="/instructor">Dashboard</Link></li>
+          {isAuthenticated && (
+            <li className="hover:text-orange-400 cursor-pointer transition-colors text-orange-500"><Link to="/dashboard">Dashboard</Link></li>
           )}
         </ul>
 
@@ -54,13 +54,13 @@ const Navbar = () => {
                     <p className="text-base md:text-lg font-bold truncate text-white">{user?.name}</p>
                   </div>
                   <ul className="py-2">
-                    {user?.role === "INSTRUCTOR" && (
+                    {isAuthenticated && (
                       <li 
-                        onClick={() => { navigate("/instructor"); setToggle(false); }}
+                        onClick={() => { navigate("/dashboard"); setToggle(false); }}
                         className="px-5 md:px-6 py-3 md:py-4 flex items-center gap-3 hover:bg-white/5 cursor-pointer text-white font-bold transition-all group border-b border-white/5"
                       >
                         <FiUser className="text-neutral-500 group-hover:text-orange-500 transition-colors" />
-                        Instructor Panel
+                        Dashboard
                       </li>
                     )}
                     <li 
@@ -112,8 +112,8 @@ const Navbar = () => {
             <li onClick={() => setMobileMenuOpen(false)} className="hover:text-white cursor-pointer transition-colors"><Link to="/">Home</Link></li>
             <li onClick={() => setMobileMenuOpen(false)} className="hover:text-white cursor-pointer transition-colors"><Link to="/cohorts">Cohorts</Link></li>
             <li onClick={() => setMobileMenuOpen(false)} className="hover:text-white cursor-pointer transition-colors"><Link to="/reviews">Reviews</Link></li>
-            {user?.role === "INSTRUCTOR" && (
-              <li onClick={() => setMobileMenuOpen(false)} className="hover:text-orange-400 cursor-pointer transition-colors text-orange-500"><Link to="/instructor">Dashboard</Link></li>
+            {isAuthenticated && (
+              <li onClick={() => setMobileMenuOpen(false)} className="hover:text-orange-400 cursor-pointer transition-colors text-orange-500"><Link to="/dashboard">Dashboard</Link></li>
             )}
             {isAuthenticated && (
               <li onClick={() => setMobileMenuOpen(false)} className="hover:text-white cursor-pointer transition-colors"><Link to="/settings">Settings</Link></li>

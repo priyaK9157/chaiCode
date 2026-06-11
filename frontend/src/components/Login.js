@@ -20,11 +20,7 @@ const Login = () => {
         dispatch(loginUser(credentials))
             .unwrap()
             .then((res) => {
-                if (res.user?.role === "INSTRUCTOR") {
-                    navigate("/instructor");
-                } else {
-                    navigate("/");
-                }
+                navigate("/dashboard");
             })
             .catch((err) => {
                 alert(err);

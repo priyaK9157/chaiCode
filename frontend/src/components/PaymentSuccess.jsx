@@ -96,10 +96,10 @@ const PaymentSuccess = () => {
               Thank you for your purchase. Your course has been unlocked and is ready for you to start learning.
             </p>
             <Link
-              to="/"
+              to="/dashboard"
               className="bg-white text-black px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-200 transition-all shadow-xl shadow-white/10"
             >
-              Explore Courses
+              Go to Dashboard
             </Link>
           </div>
         )}
