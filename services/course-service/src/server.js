@@ -2,6 +2,15 @@ import app from "./app.js";
 import env from "./config/env.js";
 import prisma from "./config/db.js"; // 1. Use the named import with curly braces
 
+// Register global error safety nets to prevent Node from crashing on unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught Exception:', err);
+});
+
 async function startServer() {
   try {
     // 2. Prisma uses $connect() to check the database, NOT .query()

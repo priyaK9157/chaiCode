@@ -62,8 +62,14 @@ const AddCourse = () => {
                 alert("Course created successfully!");
                 navigate("/instructor");
             } else {
-                const error = await response.json();
-                alert(`Error: ${error.message || "Failed to create course"}`);
+                let errorMessage = "Failed to create course";
+                try {
+                    const error = await response.json();
+                    errorMessage = error.message || errorMessage;
+                } catch (jsonErr) {
+                    errorMessage = `Server error: ${response.status} ${response.statusText}`;
+                }
+                alert(`Error: ${errorMessage}`);
             }
         } catch (error) {
             console.error("Error creating course:", error);
