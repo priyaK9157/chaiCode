@@ -4,28 +4,33 @@ import { generateToken } from "../utils/generateToken.js";
 
 
 export const sendEmail = async (email, subject, text) => {
-  console.log(`[Email] Attempting to send email to ${email} via Resend API...`);
+  console.log(`[Email] Attempting to send email to ${email} via Brevo API...`);
   try {
-    const response = await fetch('https://api.resend.com/emails', {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json'
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
       },
       body: JSON.stringify({
-        from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
-        to: email,
-        subject,
-        text
+        sender: {
+          name: process.env.EMAIL_FROM_NAME || "Chai Code",
+          email: process.env.EMAIL_FROM || process.env.EMAIL_USER || "sendmailpriya4@gmail.com"
+        },
+        to: [{ email: email }],
+        subject: subject,
+        textContent: text
       })
     });
+
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data.message || JSON.stringify(data));
     }
-    console.log(`[Email] Successfully sent via Resend: ${data.id}`);
+    console.log(`[Email] Successfully sent via Brevo: ${data.messageId || JSON.stringify(data)}`);
   } catch (error) {
-    console.error("[Email] Resend API failed:", error);
+    console.error("[Email] Brevo API failed:", error);
     throw new Error(`Email sending failed: ${error.message}`);
   }
 };
