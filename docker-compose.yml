@@ -1,28 +1,6 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: chsi_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: chsi_auth
-    ports:
-      - '5433:5432'
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init-dbs.sql:/docker-entrypoint-initdb.d/init-dbs.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks:
-      - chsi-network
-
   auth-service:
     build:
       context: ./services/auth-service
@@ -32,13 +10,10 @@ services:
       - '5001:5001'
     env_file:
       - ./services/auth-service/.env
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - chsi-network
     environment:
       - NODE_ENV=production
+    networks:
+      - chsi-network
 
   course-service:
     build:
@@ -49,14 +24,11 @@ services:
       - '5002:5002'
     env_file:
       - ./services/course-service/.env
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - chsi-network
     environment:
       - NODE_ENV=production
       - FRONTEND_URL=https://chai-code-puce.vercel.app
+    networks:
+      - chsi-network
 
   api-gateway:
     build:
@@ -96,9 +68,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-
-volumes:
-  postgres_data:
 
 networks:
   chsi-network:

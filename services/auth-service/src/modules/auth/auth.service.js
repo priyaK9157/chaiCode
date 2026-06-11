@@ -1,34 +1,32 @@
 import prisma from "../../config/db.js";
 import { hashPassword, comparePassword } from "../utils/hashPassword.js";
 import { generateToken } from "../utils/generateToken.js";
-import nodemailer from "nodemailer";
 
-const sendEmail = async (email, subject, text) => {
+
+export const sendEmail = async (email, subject, text) => {
+  console.log(`[Email] Attempting to send email to ${email} via Resend API...`);
   try {
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      console.log(`[Email] Attempting to send email to ${email}...`);
-      const info = await transporter.sendMail({
-        from: process.env.EMAIL_USER,
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
         to: email,
         subject,
         text
-      });
-      console.log(`[Email] Successfully sent: ${info.response}`);
-    } else {
-      console.log("[Email] Skipped sending real email (Credentials not set).");
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || JSON.stringify(data));
     }
+    console.log(`[Email] Successfully sent via Resend: ${data.id}`);
   } catch (error) {
-    console.error("[Email] Failed to send email:", error);
+    console.error("[Email] Resend API failed:", error);
+    throw new Error(`Email sending failed: ${error.message}`);
   }
 };
 
