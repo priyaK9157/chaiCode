@@ -31,42 +31,46 @@ const Cohort = () => {
       
       {/* Slider Wrapper */}
       <div className="w-full max-w-6xl mx-auto">
-        <Swiper
-          modules={[Navigation]}
-          spaceBetween={50}
-          slidesPerView={1}
-          breakpoints={{
-            640: { slidesPerView: 2, spaceBetween: 30 },
-            1024: { slidesPerView: 3, spaceBetween: 50 },
-          }}
-          navigation={{
-            nextEl: ".cohort-next",
-            prevEl: ".cohort-prev",
-          }}
-        >
-          {courses.map((course) => (
-            <SwiperSlide key={course.id}>
-              <Link to={`/cohort/${course.id}`} className="block relative group overflow-hidden rounded-2xl transform transition-transform duration-300 hover:scale-105 cursor-pointer shadow-xl border border-neutral-800">
-                <img
-                    src={course.thumbnailUrl || defaultThumb}
-                    alt="course-thumb"
-                    className="h-[350px] w-full object-cover transition-opacity group-hover:opacity-80"
-                />
-                {/* Gradient Overlay for Text Readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-                
-                <div className="absolute bottom-0 left-0 p-8 w-full">
-                    <p className="text-white font-bold text-2xl group-hover:text-orange-300 transition-colors uppercase tracking-wide">
-                        {course.title}
-                    </p>
-                    <p className="text-orange-200 text-sm mt-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                        View Course <MdKeyboardArrowRight size={20} />
-                    </p>
-                </div>
-              </Link>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        {courses.length > 0 && (
+          <Swiper
+            modules={[Navigation]}
+            spaceBetween={50}
+            slidesPerView={1}
+            breakpoints={{
+              640: { slidesPerView: 2, spaceBetween: 30 },
+              1024: { slidesPerView: 3, spaceBetween: 50 },
+            }}
+            navigation={{
+              nextEl: ".cohort-next",
+              prevEl: ".cohort-prev",
+            }}
+            observer={true}
+            observeParents={true}
+          >
+            {courses.map((course) => (
+              <SwiperSlide key={course.id}>
+                <Link to={`/cohort/${course.id}`} className="block relative group overflow-hidden rounded-2xl transform transition-transform duration-300 hover:scale-105 cursor-pointer shadow-xl border border-neutral-800">
+                  <img
+                      src={course.thumbnailUrl || defaultThumb}
+                      alt="course-thumb"
+                      className="h-[350px] w-full object-cover transition-opacity group-hover:opacity-80"
+                  />
+                  {/* Gradient Overlay for Text Readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                  
+                  <div className="absolute bottom-0 left-0 p-8 w-full">
+                      <p className="text-white font-bold text-2xl group-hover:text-orange-300 transition-colors uppercase tracking-wide">
+                          {course.title}
+                      </p>
+                      <p className="text-orange-200 text-sm mt-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                          View Course <MdKeyboardArrowRight size={20} />
+                      </p>
+                  </div>
+                </Link>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        )}
       </div>
 
       {/* Custom Buttons */}
