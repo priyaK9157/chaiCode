@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import http from 'http';
+import https from 'https';
 
 const app = express();
 app.set("trust proxy", true);
@@ -50,6 +52,20 @@ app.use(createProxyMiddleware(['/api/courses', '/api/sections', '/api/lessons', 
   },
 }));
 
+const pingUrl = (url) => {
+  if (!url) return;
+  const client = url.startsWith('https') ? https : http;
+  console.log(`📡 [Gateway] Waking up target service: ${url}`);
+  client.get(url, (res) => {
+    console.log(`✅ [Gateway] Wake up ping to ${url} returned status: ${res.statusCode}`);
+  }).on('error', (err) => {
+    console.error(`❌ [Gateway] Wake up ping error for ${url}:`, err.message);
+  });
+};
+
 app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
+  // Asynchronously trigger wakeups for the microservices
+  pingUrl(targetAuth);
+  pingUrl(targetCourse);
 });

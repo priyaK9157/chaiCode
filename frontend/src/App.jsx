@@ -1,6 +1,7 @@
 import {useEffect} from "react"
 import { Routes, Route } from "react-router-dom";
 import './App.css';
+import { API_BASE_URL } from "./config";
 import Navbar from "./common/Navbar"
 import BackgroundImage from "./common/BackgroundImage";
 import Footer from "./components/Footer"
@@ -49,6 +50,13 @@ function App() {
     }, 3000)
     return () => clearInterval(interval);
   }, [images.length]);
+
+  useEffect(() => {
+    // Wake up the API Gateway immediately on load to start waking up microservices
+    if (API_BASE_URL) {
+      fetch(`${API_BASE_URL}/`).catch(() => {});
+    }
+  }, []);
 
   return (
     <section className=''>
