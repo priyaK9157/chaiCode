@@ -3,6 +3,7 @@ import cors from 'cors';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const app = express();
+app.set("trust proxy", true);
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());

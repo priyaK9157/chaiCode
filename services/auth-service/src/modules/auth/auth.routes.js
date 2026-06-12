@@ -8,7 +8,7 @@ const router = express.Router();
 // Rate limiters
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 login attempts per 15 min
+  max: 30, // 30 login attempts per 15 min
   message: { message: "Too many login attempts. Please try again after 15 minutes." },
   standardHeaders: true,
   legacyHeaders: false,
@@ -16,7 +16,7 @@ const loginLimiter = rateLimit({
 
 const registerLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 3, // 3 signup attempts per 15 min
+  max: 15, // 15 signup attempts per 15 min
   message: { message: "Too many signup attempts. Please try again after 15 minutes." },
   standardHeaders: true,
   legacyHeaders: false,
@@ -24,7 +24,7 @@ const registerLimiter = rateLimit({
 
 const otpLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 3, // 3 OTP resend per 15 min
+  max: 10, // 10 OTP resend per 15 min
   message: { message: "Too many OTP requests. Please try again after 15 minutes." },
   standardHeaders: true,
   legacyHeaders: false,
