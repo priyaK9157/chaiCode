@@ -63,6 +63,13 @@ const pingUrl = (url) => {
   });
 };
 
+app.get('/api/ping-all', (req, res) => {
+  console.log('📡 [Gateway] Ping-all requested. Waking up downstream services...');
+  pingUrl(targetAuth);
+  pingUrl(targetCourse);
+  res.json({ message: 'Wake up pings dispatched' });
+});
+
 app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
   // Asynchronously trigger wakeups for the microservices

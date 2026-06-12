@@ -54,7 +54,7 @@ function App() {
   useEffect(() => {
     // Wake up the API Gateway immediately on load to start waking up microservices
     if (API_BASE_URL) {
-      fetch(`${API_BASE_URL}/`).catch(() => {});
+      fetch(`${API_BASE_URL}/api/ping-all`).catch(() => {});
     }
   }, []);
 
