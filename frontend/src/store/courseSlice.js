@@ -1,16 +1,32 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_BASE_URL } from '../config';
 
+const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+const fetchWithRetry = async (url, options = {}, maxRetries = 5, delayMs = 5000) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.warn(`[Retry Fetch] Attempt ${attempt} failed for ${url}: ${error.message}`);
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      await delay(delayMs);
+    }
+  }
+};
+
 // Async thunk to fetch course by ID
 export const fetchCourseById = createAsyncThunk(
   'courses/fetchById',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/courses/${id}`);
-      if (!response.ok) {
-        throw new Error('Server error!');
-      }
-      return await response.json();
+      return await fetchWithRetry(`${API_BASE_URL}/api/courses/${id}`);
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -22,11 +38,7 @@ export const fetchAllCourses = createAsyncThunk(
   'courses/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/courses`);
-      if (!response.ok) {
-        throw new Error('Server error!');
-      }
-      return await response.json();
+      return await fetchWithRetry(`${API_BASE_URL}/api/courses`);
     } catch (error) {
       return rejectWithValue(error.message);
     }
