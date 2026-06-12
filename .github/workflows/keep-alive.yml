@@ -1,0 +1,34 @@
+name: Keep Services Alive
+
+on:
+  schedule:
+    # Runs every 10 minutes (Render free tier sleeps after 15 minutes of inactivity)
+    - cron: '*/10 * * * *'
+  # Allows manual triggers from the GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping API Gateway & Downstream Services
+        run: |
+          echo "Sending keep-alive pings..."
+          
+          echo "Pinging API Gateway..."
+          curl -I -s -o /dev/null -w "%{http_code}" "https://chaicode-4.onrender.com/"
+          echo ""
+          
+          echo "Pinging Auth Service..."
+          curl -I -s -o /dev/null -w "%{http_code}" "https://chaicode-3.onrender.com/"
+          echo ""
+          
+          echo "Pinging Course Service..."
+          curl -I -s -o /dev/null -w "%{http_code}" "https://chaicode-5.onrender.com/"
+          echo ""
+          
+          echo "Triggering API Gateway downstream ping-all..."
+          curl -s -o /dev/null -w "%{http_code}" "https://chaicode-4.onrender.com/api/ping-all"
+          echo ""
+          
+          echo "All pings dispatched successfully!"

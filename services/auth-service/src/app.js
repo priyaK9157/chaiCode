@@ -10,6 +10,10 @@ app.set("trust proxy", true);
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.json({ status: "ok", service: "auth-service" });
+});
+
 app.use("/api", routes);
 
 app.use(errorMiddleware);
