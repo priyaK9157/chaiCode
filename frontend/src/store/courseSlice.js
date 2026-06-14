@@ -3,11 +3,15 @@ import { API_BASE_URL } from '../config';
 
 const delay = (ms) => new Promise(res => setTimeout(res, ms));
 
-const fetchWithRetry = async (url, options = {}, maxRetries = 5, delayMs = 5000) => {
+const fetchWithRetry = async (url, options = {}, maxRetries = 5, initialDelayMs = 5000) => {
+  let currentDelay = initialDelayMs;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await fetch(url, options);
       if (!response.ok) {
+        if (response.status === 429) {
+          console.warn(`⚠️ [Rate Limit] Received 429 from ${url}. Server might be waking up (hibernate-rate-limited). Increasing delay.`);
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return await response.json();
@@ -16,7 +20,8 @@ const fetchWithRetry = async (url, options = {}, maxRetries = 5, delayMs = 5000)
       if (attempt === maxRetries) {
         throw error;
       }
-      await delay(delayMs);
+      await delay(currentDelay);
+      currentDelay = currentDelay * 2; // Double the delay for the next attempt (exponential backoff)
     }
   }
 };
