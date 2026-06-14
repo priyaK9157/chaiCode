@@ -25,6 +25,7 @@ import PaymentSuccess from "./components/PaymentSuccess";
 import PaymentCancel from "./components/PaymentCancel";
 import InstructorCourseDetails from "./components/InstructorCourseDetails";
 import Checkout from "./components/Checkout";
+import Chatbot from "./components/Chatbot";
 
 function App() {
   // const [visibleImage, setVisibleImage] = useState(0);
@@ -94,6 +95,7 @@ function App() {
        </Routes>
        
        <Footer />
+       <Chatbot />
     </section>
   );
 }
