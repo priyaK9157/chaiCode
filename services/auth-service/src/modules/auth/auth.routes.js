@@ -30,11 +30,11 @@ const otpLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-router.post("/register", registerLimiter, register);
+router.post("/register", register);
 router.post("/verify-signup", verifySignup);
-router.post("/resend-signup-otp", otpLimiter, resendSignupOtp);
-router.post("/login", loginLimiter, login);
-router.post("/forgot-password", otpLimiter, forgotPassword);
+router.post("/resend-signup-otp", resendSignupOtp);
+router.post("/login", login);
+router.post("/forgot-password", forgotPassword);
 router.post("/verify-otp", verifyOtp);
 router.post("/reset-password", resetPassword);
 router.delete("/profile", protect, deleteProfile);
