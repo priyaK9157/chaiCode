@@ -95,6 +95,63 @@ app.get('/', (req, res) => {
   res.json({ status: "ok", service: "chatbot-service" });
 });
 
+app.post('/chatbot/sync-courses', async (req, res) => {
+  const { action, course, courseId } = req.body;
+  const apiKey = geminiApiKey;
+
+  if (!apiKey) {
+    console.warn("⚠️ [Chatbot Service Sync] GEMINI_API_KEY is not configured.");
+    return res.status(501).json({ error: "Gemini API key is not configured on the server." });
+  }
+
+  try {
+    if (action === 'upsert' && course) {
+      console.log(`📥 [Chatbot Service] Syncing/Upserting course to Qdrant: ${course.title}`);
+      const textToEmbed = `Title: ${course.title}\nDescription: ${course.description || ""}`;
+      const courseEmbedding = await getEmbedding(textToEmbed, apiKey);
+      
+      const point = {
+        id: course.id,
+        vector: courseEmbedding,
+        payload: course
+      };
+
+      const upsertRes = await fetch(`${qdrantUrl}/collections/courses/points?wait=true`, {
+        method: 'PUT',
+        headers: getQdrantHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ points: [point] })
+      });
+
+      if (!upsertRes.ok) {
+        const errText = await upsertRes.text();
+        throw new Error(`Qdrant upsert failed: ${errText}`);
+      }
+      console.log(`✅ [Chatbot Service] Course synced successfully in Qdrant: ${course.title}`);
+    } else if (action === 'delete' && courseId) {
+      console.log(`📥 [Chatbot Service] Deleting course from Qdrant: ${courseId}`);
+      
+      const deleteRes = await fetch(`${qdrantUrl}/collections/courses/points/delete`, {
+        method: 'POST',
+        headers: getQdrantHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          points: [courseId]
+        })
+      });
+
+      if (!deleteRes.ok) {
+        const errText = await deleteRes.text();
+        throw new Error(`Qdrant delete failed: ${errText}`);
+      }
+      console.log(`✅ [Chatbot Service] Course deleted successfully from Qdrant: ${courseId}`);
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("❌ [Chatbot Service Sync Error]:", error.message);
+    res.status(500).json({ error: "Failed to sync course: " + error.message });
+  }
+});
+
 app.post('/chatbot', async (req, res) => {
   const { message, history, courses } = req.body;
   const apiKey = geminiApiKey || req.headers['x-api-key'];
@@ -110,54 +167,38 @@ app.post('/chatbot', async (req, res) => {
 
     let relevantCourses = [];
 
-    if (queryEmbedding && courses && courses.length > 0) {
-      // Prepare points for Qdrant upsert
-      const points = await Promise.all(courses.map(async (course) => {
-        const textToEmbed = `Title: ${course.title}\nDescription: ${course.description || ""}`;
-        const courseEmbedding = await getEmbedding(textToEmbed, apiKey);
-        return {
-          id: course.id, // UUID format works out of the box in Qdrant
-          vector: courseEmbedding,
-          payload: course
-        };
-      }));
+    if (queryEmbedding) {
+      try {
+        // Query Qdrant for top 2 similar courses
+        const searchRes = await fetch(`${qdrantUrl}/collections/courses/points/search`, {
+          method: 'POST',
+          headers: getQdrantHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            vector: queryEmbedding,
+            limit: 2,
+            with_payload: true
+          })
+        });
 
-      // Upsert to Qdrant
-      const upsertRes = await fetch(`${qdrantUrl}/collections/courses/points?wait=true`, {
-        method: 'PUT',
-        headers: getQdrantHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ points })
-      });
-
-      if (!upsertRes.ok) {
-        const errText = await upsertRes.text();
-        throw new Error(`Qdrant upsert failed: ${errText}`);
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          console.log("🔍 [Chatbot Service Qdrant Vector RAG] Similarity scores:");
+          searchData.result.forEach(r => {
+            console.log(` - ${r.payload.title}: ${r.score.toFixed(4)}`);
+          });
+          relevantCourses = searchData.result.map(r => r.payload);
+        } else {
+          const errText = await searchRes.text();
+          console.error("❌ Qdrant search request failed:", errText);
+        }
+      } catch (err) {
+        console.error("❌ [Chatbot Service Qdrant Vector RAG] Failed to query Qdrant:", err.message);
       }
+    }
 
-      // Query Qdrant for top 2 similar courses
-      const searchRes = await fetch(`${qdrantUrl}/collections/courses/points/search`, {
-        method: 'POST',
-        headers: getQdrantHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({
-          vector: queryEmbedding,
-          limit: 2,
-          with_payload: true
-        })
-      });
-
-      if (!searchRes.ok) {
-        const errText = await searchRes.text();
-        throw new Error(`Qdrant search failed: ${errText}`);
-      }
-
-      const searchData = await searchRes.json();
-      console.log("🔍 [Chatbot Service Qdrant Vector RAG] Similarity scores:");
-      searchData.result.forEach(r => {
-        console.log(` - ${r.payload.title}: ${r.score.toFixed(4)}`);
-      });
-      relevantCourses = searchData.result.map(r => r.payload);
-    } else {
-      relevantCourses = courses || [];
+    // Fallback: If Qdrant search returns no matches or fails, use the courses array from frontend
+    if (relevantCourses.length === 0 && courses && courses.length > 0) {
+      relevantCourses = courses.slice(0, 2);
     }
 
     // 2. Prepare system instruction with the context (retrieved courses list)

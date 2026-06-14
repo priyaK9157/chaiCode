@@ -27,6 +27,7 @@ services:
     environment:
       - NODE_ENV=production
       - FRONTEND_URL=https://chai-code-puce.vercel.app
+      - CHATBOT_SERVICE_URL=http://chatbot-service:5003
     networks:
       - chsi-network
  
