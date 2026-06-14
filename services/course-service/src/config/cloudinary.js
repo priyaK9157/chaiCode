@@ -16,4 +16,14 @@ const storage = new CloudinaryStorage({
   },
 });
 
+const videoStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'chai_courses_videos',
+    resource_type: 'video',
+    allowed_formats: ['mp4', 'mkv', 'avi', 'mov', 'webm'],
+  },
+});
+
 export const uploadCloud = multer({ storage });
+export const uploadVideo = multer({ storage: videoStorage });

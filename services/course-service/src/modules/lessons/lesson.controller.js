@@ -16,12 +16,21 @@ export const createLesson = async (req, res, next) => {
       return res.status(403).json({ message: "Forbidden" });
     }
 
+    let finalVideoUrl = videoUrl;
+    if (req.file) {
+      finalVideoUrl = req.file.path;
+    }
+
+    if (!finalVideoUrl) {
+      return res.status(400).json({ message: "Video file or URL is required" });
+    }
+
     const lesson = await lessonService.createLesson({
       title,
-      videoUrl,
-      duration: parseInt(duration),
-      order: order || 0,
-      isPreview: !!isPreview,
+      videoUrl: finalVideoUrl,
+      duration: duration ? parseInt(duration) : 0,
+      order: order ? parseInt(order) : 0,
+      isPreview: isPreview === 'true' || isPreview === true,
       sectionId
     });
 
@@ -46,8 +55,14 @@ export const updateLesson = async (req, res, next) => {
     }
 
     const updatedData = { ...req.body };
+    if (req.file) {
+      updatedData.videoUrl = req.file.path;
+    }
     if (updatedData.duration) updatedData.duration = parseInt(updatedData.duration);
-    if (updatedData.isPreview !== undefined) updatedData.isPreview = !!updatedData.isPreview;
+    if (updatedData.order) updatedData.order = parseInt(updatedData.order);
+    if (updatedData.isPreview !== undefined) {
+      updatedData.isPreview = updatedData.isPreview === 'true' || updatedData.isPreview === true;
+    }
 
     const updatedLesson = await lessonService.updateLesson(id, updatedData);
     res.json(updatedLesson);

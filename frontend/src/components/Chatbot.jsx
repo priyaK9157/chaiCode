@@ -5,6 +5,7 @@ import { fetchAllCourses } from "../store/courseSlice";
 import { BsChatDotsFill } from "react-icons/bs";
 import { IoSend, IoClose } from "react-icons/io5";
 import { GoArrowUpRight } from "react-icons/go";
+import { API_BASE_URL } from "../config";
 
 const Chatbot = () => {
   const dispatch = useDispatch();
@@ -92,7 +93,54 @@ const Chatbot = () => {
     return matches;
   };
 
-  const handleSendMessage = (textToSend) => {
+  const runLocalFallback = (messageText) => {
+    const cleanText = messageText.toLowerCase().trim();
+
+    // Greetings check
+    const greetings = ["hi", "hello", "hey", "hola", "yo", "namaste", "help"];
+    const isGreeting = greetings.some((g) => cleanText === g || cleanText.startsWith(g + " "));
+
+    if (isGreeting) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          sender: "bot",
+          text: "Hello there! How can I help you today? Ask me about any course, or choose from our available programs:",
+          pills: courses.map((c) => c.title),
+        },
+      ]);
+      return;
+    }
+
+    // Search for courses
+    const matched = searchCourses(messageText);
+
+    if (matched.length > 0) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          sender: "bot",
+          text: `I found the following course(s) matching your request:`,
+          courses: matched,
+        },
+      ]);
+    } else {
+      // No match found
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          sender: "bot",
+          text: "I couldn't find a direct match for that. Here are the courses currently available on our platform. Click on any course to get its link:",
+          pills: courses.length > 0 ? courses.map((c) => c.title) : ["Web Development Cohort", "Interview Preparation"],
+        },
+      ]);
+    }
+  };
+
+  const handleSendMessage = async (textToSend) => {
     const messageText = textToSend || inputValue;
     if (!messageText.trim()) return;
 
@@ -102,58 +150,75 @@ const Chatbot = () => {
       sender: "user",
       text: messageText,
     };
+    
+    // Format history for payload
+    const currentHistory = messages
+      .filter((m) => m.id !== "welcome")
+      .map((m) => ({
+        sender: m.sender,
+        text: m.text,
+      }));
+
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsTyping(true);
 
-    // Simulate chatbot live answering delay (800ms)
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chatbot`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: messageText,
+          history: currentHistory,
+          courses: courses,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned status ${response.status}`);
+      }
+
+      const data = await response.json();
       setIsTyping(false);
-      const cleanText = messageText.toLowerCase().trim();
 
-      // Greetings check
-      const greetings = ["hi", "hello", "hey", "hola", "yo", "namaste", "help"];
-      const isGreeting = greetings.some((g) => cleanText === g || cleanText.startsWith(g + " "));
+      let text = data.text || "";
+      let matchedCourses = [];
 
-      if (isGreeting) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            sender: "bot",
-            text: "Hello there! How can I help you today? Ask me about any course, or choose from our available programs:",
-            pills: courses.map((c) => c.title),
-          },
-        ]);
-        return;
+      // Parse RECOMMENDED_IDS from response text
+      // Pattern: [RECOMMENDED_IDS: id1, id2]
+      const recommendedMatch = text.match(/\[RECOMMENDED_IDS:\s*([^\]]+)\]/);
+      if (recommendedMatch) {
+        // Strip the tag from the text
+        text = text.replace(/\[RECOMMENDED_IDS:\s*([^\]]+)\]/, "").trim();
+        
+        // Parse IDs
+        const ids = recommendedMatch[1]
+          .split(",")
+          .map((id) => id.trim())
+          .filter(Boolean);
+          
+        // Map to actual course objects
+        matchedCourses = courses.filter((c) => ids.includes(c.id));
       }
 
-      // Search for courses
-      const matched = searchCourses(messageText);
+      // Add bot message
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          sender: "bot",
+          text: text || "Here is what I found:",
+          courses: matchedCourses.length > 0 ? matchedCourses : undefined,
+        },
+      ]);
 
-      if (matched.length > 0) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            sender: "bot",
-            text: `I found ${matched.length} course(s) matching your request:`,
-            courses: matched,
-          },
-        ]);
-      } else {
-        // No match found
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            sender: "bot",
-            text: "I couldn't find a direct match for that. Here are the courses currently available on our platform. Click on any course to get its link:",
-            pills: courses.length > 0 ? courses.map((c) => c.title) : ["Web Development Cohort", "Interview Preparation"],
-          },
-        ]);
-      }
-    }, 800);
+    } catch (error) {
+      console.warn("⚠️ [Chatbot AI Error] Failed to call AI endpoint. Falling back to rule-based engine:", error.message);
+      setIsTyping(false);
+      runLocalFallback(messageText);
+    }
   };
 
   const handleKeyPress = (e) => {

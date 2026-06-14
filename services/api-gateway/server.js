@@ -18,6 +18,7 @@ app.get('/', (req, res) => {
 // Proxy logic
 const targetAuth = process.env.TARGET_AUTH || 'https://chaicode-3.onrender.com';
 const targetCourse = process.env.TARGET_COURSE || 'https://chaicode-5.onrender.com';
+const targetChatbot = process.env.TARGET_CHATBOT || 'http://localhost:5003';
 
 const handleProxyError = (serviceName) => (err, req, res) => {
   console.error(`❌ [Gateway Proxy Error] in ${serviceName} service for ${req.method} ${req.url}:`, err.message);
@@ -52,6 +53,20 @@ app.use(createProxyMiddleware(['/api/courses', '/api/sections', '/api/lessons', 
   },
 }));
 
+// Proxy requests starting with /api/chatbot to the Chatbot Service
+app.use(createProxyMiddleware('/api/chatbot', {
+  target: targetChatbot,
+  changeOrigin: true,
+  secure: false,
+  onError: handleProxyError('CHATBOT'),
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`📡 [Gateway] Proxying CHATBOT request to: ${targetChatbot}${req.url}`);
+  },
+  pathRewrite: {
+    '^/api/chatbot': '/chatbot', // Rewrite /api/chatbot to /chatbot for chatbot-service
+  },
+}));
+
 const pingUrl = (url) => {
   if (!url) return;
   const client = url.startsWith('https') ? https : http;
@@ -67,6 +82,7 @@ app.get('/api/ping-all', (req, res) => {
   console.log('📡 [Gateway] Ping-all requested. Waking up downstream services...');
   pingUrl(targetAuth);
   pingUrl(targetCourse);
+  pingUrl(targetChatbot);
   res.json({ message: 'Wake up pings dispatched' });
 });
 
@@ -75,4 +91,5 @@ app.listen(PORT, () => {
   // Asynchronously trigger wakeups for the microservices
   pingUrl(targetAuth);
   pingUrl(targetCourse);
+  pingUrl(targetChatbot);
 });
