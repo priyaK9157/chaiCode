@@ -2,8 +2,21 @@ import prisma from "../../config/db.js";
 import { hashPassword, comparePassword } from "../utils/hashPassword.js";
 import { generateToken } from "../utils/generateToken.js";
 
+// Helper to throw errors with custom status codes
+const throwError = (message, status = 500) => {
+  const err = new Error(message);
+  err.status = status;
+  throw err;
+};
 
 export const sendEmail = async (email, subject, text) => {
+  if (!process.env.BREVO_API_KEY) {
+    console.log(`[Email Service Mock] (No BREVO_API_KEY) Mock sending email to ${email}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`Body: ${text}`);
+    return;
+  }
+
   console.log(`[Email] Attempting to send email to ${email} via Brevo API...`);
   try {
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -31,7 +44,7 @@ export const sendEmail = async (email, subject, text) => {
     console.log(`[Email] Successfully sent via Brevo: ${data.messageId || JSON.stringify(data)}`);
   } catch (error) {
     console.error("[Email] Brevo API failed:", error);
-    throw new Error(`Email sending failed: ${error.message}`);
+    throwError(`Email sending failed: ${error.message}`, 500);
   }
 };
 
@@ -45,7 +58,7 @@ export const register = async (data) => {
 
   if (existingUser) {
     if (existingUser.isVerified) {
-      throw new Error("Email already registered. Please login.");
+      throwError("Email already registered. Please login.", 400);
     }
 
     // User exists but not verified — update their details and resend OTP
@@ -87,8 +100,8 @@ export const register = async (data) => {
 
 export const resendSignupOtp = async (email) => {
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error("User not found");
-  if (user.isVerified) throw new Error("User already verified");
+  if (!user) throwError("User not found", 404);
+  if (user.isVerified) throwError("User already verified", 400);
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const expiry = new Date(Date.now() + 10 * 60 * 1000);
@@ -106,11 +119,11 @@ export const resendSignupOtp = async (email) => {
 
 export const verifySignup = async (email, otp) => {
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error("User not found");
-  if (user.isVerified) throw new Error("User already verified");
+  if (!user) throwError("User not found", 404);
+  if (user.isVerified) throwError("User already verified", 400);
 
-  if (user.signupOtp !== otp) throw new Error("Invalid OTP");
-  if (user.signupOtpExpiry < new Date()) throw new Error("OTP Expired");
+  if (user.signupOtp !== otp) throwError("Invalid OTP", 400);
+  if (user.signupOtpExpiry < new Date()) throwError("OTP Expired", 400);
 
   const updatedUser = await prisma.user.update({
     where: { email },
@@ -132,14 +145,14 @@ export const login = async (data) => {
     where: { email: data.email }
   });
 
-  if (!user) throw new Error("User not found");
+  if (!user) throwError("User not found", 404);
 
   if (!user.isVerified) {
-    throw new Error("Account not verified. Please complete signup verification.");
+    throwError("Account not verified. Please complete signup verification.", 401);
   }
 
   const valid = await comparePassword(data.password, user.password);
-  if (!valid) throw new Error("Invalid credentials");
+  if (!valid) throwError("Invalid credentials", 401);
 
   return {
     user,
@@ -149,7 +162,7 @@ export const login = async (data) => {
 
 export const forgotPassword = async (email) => {
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error("User not found");
+  if (!user) throwError("User not found", 404);
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
@@ -167,17 +180,17 @@ export const forgotPassword = async (email) => {
 
 export const verifyOtp = async (email, otp) => {
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error("User not found");
+  if (!user) throwError("User not found", 404);
 
-  if (user.resetOtp !== otp) throw new Error("Invalid OTP");
-  if (user.resetOtpExpiry < new Date()) throw new Error("OTP Expired");
+  if (user.resetOtp !== otp) throwError("Invalid OTP", 400);
+  if (user.resetOtpExpiry < new Date()) throwError("OTP Expired", 400);
 
   return { message: "OTP verified successfully" };
 };
 
 export const resetPassword = async (email, newPassword) => {
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error("User not found");
+  if (!user) throwError("User not found", 404);
 
   const hashed = await hashPassword(newPassword);
 
@@ -195,7 +208,7 @@ export const resetPassword = async (email, newPassword) => {
 
 export const deleteProfile = async (userId) => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw new Error("User not found");
+  if (!user) throwError("User not found", 404);
 
   await prisma.user.delete({ where: { id: userId } });
   return { message: "Profile deleted successfully" };

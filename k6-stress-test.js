@@ -1,9 +1,13 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { Rate } from 'k6/metrics';
 
-// Base URL: Defaults to api-gateway service inside the docker-compose network.
-// Can be overridden via environment variable, e.g., k6 run -e BASE_URL=https://chaicode-4.onrender.com k6-stress-test.js
-const BASE_URL = __ENV.BASE_URL || 'http://api-gateway:5000';
+// Custom metric to track actual server errors (5xx), ignoring expected client errors (4xx like 404, 429)
+const serverErrors = new Rate('server_errors');
+
+// Base URL: Defaults to localhost for host terminal execution.
+// If running inside docker network, override via: k6 run -e BASE_URL=http://api-gateway:5000 k6-stress-test.js
+const BASE_URL = __ENV.BASE_URL || 'http://localhost:5000';
 
 export const options = {
   // Scenarios to model a realistic load, stress, and spike test pattern
@@ -16,7 +20,7 @@ export const options = {
   ],
   thresholds: {
     // Overall metrics thresholds
-    http_req_failed: ['rate<0.05'], // General request failure rate must be less than 5% (excluding expected 429 rate-limiting status)
+    server_errors: ['rate<0.05'], // Only fail threshold if actual server-side errors (5xx) exceed 5%
     http_req_duration: ['p(95)<400'], // 95% of API requests must complete in less than 400ms
   },
 };
@@ -24,15 +28,17 @@ export const options = {
 export default function () {
   // --- TEST CASE 1: API Gateway & Core System Health Check ---
   const healthRes = http.get(`${BASE_URL}/`);
+  serverErrors.add(healthRes.status >= 500);
   check(healthRes, {
     'Gateway responds with 200 OK': (r) => r.status === 200,
-    'Gateway returns correct greeting': (r) => r.body.includes('API Gateway is running'),
+    'Gateway returns correct greeting': (r) => r.body && r.body.includes('API Gateway is running'),
   });
 
   sleep(0.5); // Add minor pacing to simulate realistic human delay
 
   // --- TEST CASE 2: Public Course Retrival (Database intensive read) ---
   const coursesRes = http.get(`${BASE_URL}/api/courses`);
+  serverErrors.add(coursesRes.status >= 500);
   check(coursesRes, {
     'GET /api/courses returns 200': (r) => r.status === 200,
     'GET /api/courses returns array': (r) => {
@@ -62,6 +68,7 @@ export default function () {
   const registerRes = http.post(`${BASE_URL}/api/auth/register`, registerPayload, {
     headers: registerHeaders,
   });
+  serverErrors.add(registerRes.status >= 500);
 
   // Note: auth-service has a strict Rate Limiter: max 3 signup attempts per 15 min per IP.
   // Under stress testing, we expect to see 201 Created initially, followed by 429 Too Many Requests.
@@ -82,6 +89,7 @@ export default function () {
   const loginRes = http.post(`${BASE_URL}/api/auth/login`, loginPayload, {
     headers: { 'Content-Type': 'application/json' },
   });
+  serverErrors.add(loginRes.status >= 500);
 
   // auth-service login rate limiter is max 5 attempts per 15 min.
   // We check that the response is either 404/401/400 (if let through by rate limiter but wrong credentials) or 429 (rate-limited).
