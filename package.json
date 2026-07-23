@@ -1,0 +1,15 @@
+{
+  "name": "chai-code-microservices",
+  "version": "1.0.0",
+  "description": "Root workspace for Chai Code microservices",
+  "private": true,
+  "scripts": {
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "test:auth": "npm --prefix services/auth-service run test:coverage",
+    "sonar": "sonarqube-scanner -Dsonar.host.url=http://localhost:9000"
+  },
+  "devDependencies": {
+    "sonarqube-scanner": "^4.2.6"
+  }
+}

@@ -14,8 +14,8 @@ export const options = {
   stages: [
     { duration: '30s', target: 20 },  // Ramp-up: Warm up the database and services up to 20 VUs (Virtual Users)
     { duration: '1m', target: 20 },   // Sustained Load: Run at normal load (20 VUs) for 1 minute
-    { duration: '30s', target: 80 },  // Ramp-up Stress: Rapidly escalate to 80 VUs
-    { duration: '1m10s', target: 80 },   // Peak Stress: Hold at maximum stress load (80 VUs)
+    { duration: '30s', target: 100 },  // Ramp-up Stress: Rapidly escalate to 80 VUs
+    { duration: '1m10s', target: 100 },   // Peak Stress: Hold at maximum stress load (80 VUs)
     { duration: '30s', target: 0 },   // Cool-down: Gracefully ramp-down back to 0 VUs
   ],
   thresholds: {
