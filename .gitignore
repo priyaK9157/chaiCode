@@ -33,3 +33,7 @@ coverage/
 *.njsproj
 *.sln
 *.sw?
+
+# SonarQube work directory
+.scannerwork/
+

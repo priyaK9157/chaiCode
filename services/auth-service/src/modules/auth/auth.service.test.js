@@ -40,6 +40,7 @@ global.fetch = mockFetch;
 describe("auth.service unit tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.BREVO_API_KEY = "mock-api-key";
   });
 
   describe("sendEmail", () => {

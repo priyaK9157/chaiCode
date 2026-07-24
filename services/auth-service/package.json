@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage --coverage.reporter=text --coverage.reporter=lcov"
   },
   "keywords": [],
   "author": "",

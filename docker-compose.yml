@@ -29,7 +29,17 @@ services:
       - NODE_ENV=production
       - FRONTEND_URL=https://chai-code-puce.vercel.app
       - CHATBOT_SERVICE_URL=http://chatbot-service:5003
+      - REDIS_URL=redis://redis:6379
       - UV_THREADPOOL_SIZE=16
+    networks:
+      - chsi-network
+
+  redis:
+    image: redis:alpine
+    container_name: chsi_redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
     networks:
       - chsi-network
  

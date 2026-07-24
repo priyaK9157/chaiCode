@@ -27,6 +27,17 @@ vi.mock("../../config/db.js", () => {
   };
 });
 
+// Mock Redis client to prevent real connection timeouts during tests
+vi.mock("../../config/redis.js", () => {
+  return {
+    default: {
+      get: vi.fn(),
+      setex: vi.fn(),
+      del: vi.fn(),
+    },
+  };
+});
+
 describe("course.service unit tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();

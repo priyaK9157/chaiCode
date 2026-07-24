@@ -1,7 +1,21 @@
 import prisma from "../../config/db.js";
+import redis from "../../config/redis.js";
 
-export const createCourse = (data, instructorId) => {
-  return prisma.course.create({
+// Helper to evict cache keys upon course changes
+const clearCourseCache = async (courseId) => {
+  try {
+    console.log(`🧹 [Cache Eviction] Clearing keys for course ID: ${courseId || 'all'}`);
+    await redis.del("courses:all");
+    if (courseId) {
+      await redis.del(`courses:${courseId}`);
+    }
+  } catch (err) {
+    console.error("⚠️ [Cache Eviction] Failed to clear Redis cache:", err.message);
+  }
+};
+
+export const createCourse = async (data, instructorId) => {
+  const course = await prisma.course.create({
     data: {
       title: data.title,
       description: data.description,
@@ -11,10 +25,24 @@ export const createCourse = (data, instructorId) => {
       instructorId
     }
   });
+  await clearCourseCache();
+  return course;
 };
 
-export const getCourses = () => {
-  return prisma.course.findMany({
+export const getCourses = async () => {
+  const cacheKey = "courses:all";
+  try {
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      console.log("⚡ [Redis] Cache HIT for all courses");
+      return JSON.parse(cached);
+    }
+  } catch (err) {
+    console.error("⚠️ [Redis] Error reading courses:all cache:", err.message);
+  }
+
+  console.log("🛢️ [Database] Cache MISS. Querying PostgreSQL for all courses");
+  const courses = await prisma.course.findMany({
     where: { isPublished: true },
     select: {
       id: true,
@@ -27,10 +55,29 @@ export const getCourses = () => {
       createdAt: true
     }
   });
+
+  try {
+    await redis.setex(cacheKey, 3600, JSON.stringify(courses)); // Cache for 1 hour
+  } catch (err) {
+    console.error("⚠️ [Redis] Error setting courses:all cache:", err.message);
+  }
+  return courses;
 };
 
-export const getCourseById = (id) => {
-  return prisma.course.findUnique({
+export const getCourseById = async (id) => {
+  const cacheKey = `courses:${id}`;
+  try {
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      console.log(`⚡ [Redis] Cache HIT for course: ${id}`);
+      return JSON.parse(cached);
+    }
+  } catch (err) {
+    console.error(`⚠️ [Redis] Error reading courses:${id} cache:`, err.message);
+  }
+
+  console.log(`🛢️ [Database] Cache MISS. Querying PostgreSQL for course: ${id}`);
+  const course = await prisma.course.findUnique({
     where: { id: id.toString() },
     select: {
       id: true,
@@ -59,7 +106,17 @@ export const getCourseById = (id) => {
       }
     }
   });
+
+  if (course) {
+    try {
+      await redis.setex(cacheKey, 3600, JSON.stringify(course));
+    } catch (err) {
+      console.error(`⚠️ [Redis] Error setting courses:${id} cache:`, err.message);
+    }
+  }
+  return course;
 };
+
 export const getInstructorCourses = (instructorId) => {
   return prisma.course.findMany({
     where: { instructorId },
@@ -74,7 +131,7 @@ export const getInstructorCourses = (instructorId) => {
   });
 };
 
-export const updateCourse = (id, data) => {
+export const updateCourse = async (id, data) => {
   const updateData = {};
   if (data.title !== undefined) updateData.title = data.title;
   if (data.description !== undefined) updateData.description = data.description;
@@ -82,10 +139,12 @@ export const updateCourse = (id, data) => {
   if (data.isPublished !== undefined) updateData.isPublished = data.isPublished === "true" || data.isPublished === true;
   if (data.thumbnailUrl !== undefined) updateData.thumbnailUrl = data.thumbnailUrl;
 
-  return prisma.course.update({
+  const course = await prisma.course.update({
     where: { id },
     data: updateData
   });
+  await clearCourseCache(id);
+  return course;
 };
 
 export const deleteCourse = async (id) => {
@@ -95,7 +154,9 @@ export const deleteCourse = async (id) => {
   });
   await prisma.section.deleteMany({ where: { courseId: id } });
   await prisma.enrollment.deleteMany({ where: { courseId: id } });
-  return prisma.course.delete({ where: { id } });
+  const course = await prisma.course.delete({ where: { id } });
+  await clearCourseCache(id);
+  return course;
 };
 
 export const getEnrolledCourses = async (studentId) => {

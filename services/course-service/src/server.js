@@ -1,6 +1,7 @@
 import app from "./app.js";
 import env from "./config/env.js";
 import prisma from "./config/db.js"; // 1. Use the named import with curly braces
+import { startOutboxWorker } from "./modules/outbox/outbox.worker.js";
 
 // Register global error safety nets to prevent Node from crashing on unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
@@ -20,6 +21,9 @@ async function startServer() {
     app.listen(env.PORT || 5000, () => {
       console.log(`Server running on port ${env.PORT || 5000}`);
     });
+
+    // Start background outbox processor
+    startOutboxWorker();
 
   } catch (error) {
     console.error("Database connection failed ❌", error);

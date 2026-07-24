@@ -8,7 +8,7 @@
     "docker:down": "docker compose down",
     "test:auth": "npm --prefix services/auth-service run test:coverage",
     "test:course": "npm --prefix services/course-service run test:coverage",
-    "sonar": "sonarqube-scanner -Dsonar.host.url=http://localhost:9000"
+    "sonar": "sonar-scanner -Dsonar.host.url=http://localhost:9000"
   },
   "devDependencies": {
     "sonarqube-scanner": "^4.2.6"

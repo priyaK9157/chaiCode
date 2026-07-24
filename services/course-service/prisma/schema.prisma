@@ -48,3 +48,14 @@ model Enrollment {
   status    String   @default("COMPLETED")
   createdAt DateTime @default(now())
 }
+
+model OutboxEvent {
+  id        String   @id @default(uuid())
+  eventType String
+  payload   String   // JSON stringified event data
+  status    String   @default("PENDING") // PENDING, PROCESSED, FAILED
+  attempts  Int      @default(0)
+  lastError String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
