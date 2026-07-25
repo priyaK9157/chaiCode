@@ -1,23 +1,36 @@
 import Redis from "ioredis";
 
-const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
+const redisUrl = process.env.REDIS_URL;
+let redis = null;
 
-console.log(`🔌 [Redis] Initializing client connecting to: ${redisUrl}`);
+if (redisUrl) {
+  console.log(`🔌 [Redis] Initializing client connecting to: ${redisUrl}`);
+  redis = new Redis(redisUrl, {
+    maxRetriesPerRequest: 3,
+    retryStrategy(times) {
+      if (times > 10) {
+        console.warn("⚠️ [Redis] Reached max retry attempts. Disabling client.");
+        return null; // Stop retrying
+      }
+      return Math.min(times * 200, 5000);
+    },
+  });
 
-const redis = new Redis(redisUrl, {
-  maxRetriesPerRequest: 3,
-  retryStrategy(times) {
-    const delay = Math.min(times * 100, 3000);
-    return delay;
-  },
-});
+  redis.on("connect", () => {
+    console.log("✅ [Redis] Client successfully connected");
+  });
 
-redis.on("connect", () => {
-  console.log("✅ [Redis] Client successfully connected");
-});
-
-redis.on("error", (err) => {
-  console.error("❌ [Redis] Client error:", err.message);
-});
+  redis.on("error", (err) => {
+    console.error("❌ [Redis] Client error:", err.message);
+  });
+} else {
+  console.log("⚠️ [Redis] REDIS_URL not configured. Caching is disabled (falling back to database).");
+  // Export a mock object that behaves like Redis but resolves silently
+  redis = {
+    get: async () => null,
+    setex: async () => null,
+    del: async () => null,
+  };
+}
 
 export default redis;
