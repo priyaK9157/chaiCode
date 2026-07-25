@@ -4,13 +4,15 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging";
 // Initialize Firebase
 // Note: Replace these values with your actual Firebase Config keys from the Firebase console!
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDA2vbJkblmtW4282pP4dmPpQfIlUBH1RQ",
+  authDomain: "chaicode-c2b80.firebaseapp.com",
+  projectId: "chaicode-c2b80",
+  storageBucket: "chaicode-c2b80.firebasestorage.app",
+  messagingSenderId: "495850796609",
+  appId: "1:495850796609:web:a7604f572253cdc32cf8c0",
+  measurementId: "G-HVB5SXS45G"
 };
+
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
