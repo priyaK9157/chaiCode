@@ -1,5 +1,5 @@
-import {useEffect} from "react"
-import { Routes, Route } from "react-router-dom";
+import { useEffect } from "react"
+import { Routes, Route, useLocation } from "react-router-dom";
 import './App.css';
 import { API_BASE_URL } from "./config";
 import Navbar from "./common/Navbar"
@@ -26,8 +26,10 @@ import PaymentCancel from "./components/PaymentCancel";
 import InstructorCourseDetails from "./components/InstructorCourseDetails";
 import Checkout from "./components/Checkout";
 import Chatbot from "./components/Chatbot";
+import { requestForToken } from "./firebase";
 
 function App() {
+  const location = useLocation();
   // const [visibleImage, setVisibleImage] = useState(0);
   const images = [
     "https://chaicode.com/assets/black-3-Bm-S1mSe.webp",
@@ -58,6 +60,20 @@ function App() {
       fetch(`${API_BASE_URL}/api/ping-all`).catch(() => {});
     }
   }, []);
+
+  // Request notification permissions and register FCM token whenever user navigates
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token && API_BASE_URL) {
+      // Give a tiny timeout for service worker registration to settle on initial load
+      const timer = setTimeout(() => {
+        requestForToken(API_BASE_URL, token).catch((err) => {
+          console.error("❌ Failed to request FCM token:", err);
+        });
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname]);
 
   return (
     <section className=''>
