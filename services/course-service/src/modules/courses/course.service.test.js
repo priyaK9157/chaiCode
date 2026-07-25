@@ -23,6 +23,9 @@ vi.mock("../../config/db.js", () => {
         findMany: vi.fn(),
         deleteMany: vi.fn(),
       },
+      fcmToken: {
+        upsert: vi.fn(),
+      },
     },
   };
 });
@@ -189,6 +192,22 @@ describe("course.service unit tests", () => {
         },
       });
       expect(result).toEqual([{ id: "course-1", title: "Enrolled Course" }]);
+    });
+  });
+
+  describe("saveFcmToken", () => {
+    it("should successfully save or update an FCM token for a user", async () => {
+      const mockFcmToken = { id: "token-1", userId: "user-123", token: "mock-fcm-token" };
+      prisma.fcmToken.upsert.mockResolvedValueOnce(mockFcmToken);
+
+      const result = await courseService.saveFcmToken("user-123", "mock-fcm-token");
+
+      expect(prisma.fcmToken.upsert).toHaveBeenCalledWith({
+        where: { token: "mock-fcm-token" },
+        update: { userId: "user-123" },
+        create: { userId: "user-123", token: "mock-fcm-token" },
+      });
+      expect(result).toEqual(mockFcmToken);
     });
   });
 });

@@ -1,50 +1,110 @@
 import prisma from "../../config/db.js";
+import { admin, isFirebaseInitialized } from "../../config/firebase.js";
 
 let isRunning = false;
 
-const processEvent = async (event) => {
-  const payload = JSON.parse(event.payload);
-  console.log(`⚙️ [Outbox Worker] Processing event: ${event.eventType} (ID: ${event.id})`);
+// Send Push Notification
+const sendFcmNotification = async (userId, title, body) => {
+  if (!isFirebaseInitialized) {
+    console.log(`🔔 [Mock] Push notification to ${userId}`);
+    return;
+  }
 
-  if (event.eventType === "ENROLLMENT_CREATED") {
-    // 1. Mock sending confirmation email
-    console.log(`✉️ [Outbox Worker] Send confirmation email to Student ${payload.studentId} for Course ${payload.courseId}`);
+  try {
+    const fcmToken = await prisma.fcmToken.findFirst({
+      where: { userId },
+    });
 
-    // 2. Notify Chatbot Service
-    const chatbotUrl = `${process.env.CHATBOT_SERVICE_URL || 'http://chatbot-service:5003'}/api/enroll`;
-    try {
-      console.log(`🔗 [Outbox Worker] Notifying Chatbot Service at: ${chatbotUrl}`);
-      const response = await fetch(chatbotUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      
-      // Note: If chatbot-service endpoint does not exist yet, this may return 404 or fail.
-      // This is expected and demonstrates the outbox retry resilience!
-      if (!response.ok) {
-        throw new Error(`Chatbot Service responded with status: ${response.status}`);
-      }
-      console.log(`✅ [Outbox Worker] Chatbot Service notified successfully`);
-    } catch (err) {
-      console.error(`⚠️ [Outbox Worker] Chatbot notification failed: ${err.message}`);
-      // Throw the error so the worker retries this event in the next cycle
-      throw err;
+    if (!fcmToken) {
+      console.log(`No FCM token found for user ${userId}`);
+      return;
     }
+
+    await admin.messaging().send({
+      token: fcmToken.token,
+      notification: {
+        title,
+        body,
+      },
+    });
+
+    console.log(`✅ Notification sent to user ${userId}`);
+  } catch (err) {
+    console.error("❌ Failed to send notification:", err.message);
   }
 };
 
+// Process Outbox Event
+const processEvent = async (event) => {
+  const payload = JSON.parse(event.payload);
+
+  if (event.eventType !== "ENROLLMENT_CREATED") return;
+
+  // Fetch Course
+  const course = await prisma.course.findUnique({
+    where: { id: payload.courseId },
+    select: {
+      title: true,
+      instructorId: true,
+    },
+  });
+
+  const courseTitle = course?.title || "your course";
+
+  // Student Notification
+  await sendFcmNotification(
+    payload.studentId,
+    "Welcome Aboard! 🚀",
+    `Your enrollment in "${courseTitle}" has been confirmed.`
+  );
+
+  // Instructor Notification
+  if (course?.instructorId) {
+    await sendFcmNotification(
+      course.instructorId,
+      "New Enrollment 🎉",
+      `A student enrolled in "${courseTitle}".`
+    );
+  }
+
+  // Chatbot Notification
+  try {
+    await fetch(
+      `${process.env.CHATBOT_SERVICE_URL || "http://chatbot-service:5003"}/api/enroll`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    console.log("✅ Chatbot notified");
+  } catch (err) {
+    console.error("❌ Chatbot Error:", err.message);
+  }
+};
+
+// Poll Outbox Table
 const pollOutbox = async () => {
   if (isRunning) return;
+
   isRunning = true;
 
   try {
     const events = await prisma.outboxEvent.findMany({
       where: {
-        status: { in: ["PENDING", "FAILED"] },
-        attempts: { lt: 5 }, // Retry up to 5 times
+        status: {
+          in: ["PENDING", "FAILED"],
+        },
+        attempts: {
+          lt: 5,
+        },
       },
-      orderBy: { createdAt: "asc" },
+      orderBy: {
+        createdAt: "asc",
+      },
       take: 5,
     });
 
@@ -52,18 +112,22 @@ const pollOutbox = async () => {
       try {
         await prisma.outboxEvent.update({
           where: { id: event.id },
-          data: { attempts: event.attempts + 1 },
+          data: {
+            attempts: event.attempts + 1,
+          },
         });
 
         await processEvent(event);
 
         await prisma.outboxEvent.update({
           where: { id: event.id },
-          data: { status: "PROCESSED" },
+          data: {
+            status: "PROCESSED",
+          },
         });
-        console.log(`✅ [Outbox Worker] Event ${event.id} marked as PROCESSED`);
+
+        console.log(`✅ Event ${event.id} processed`);
       } catch (err) {
-        console.error(`❌ [Outbox Worker] Event ${event.id} failed to process:`, err.message);
         await prisma.outboxEvent.update({
           where: { id: event.id },
           data: {
@@ -71,17 +135,17 @@ const pollOutbox = async () => {
             lastError: err.message,
           },
         });
+
+        console.error(`❌ Event ${event.id} failed`);
       }
     }
-  } catch (err) {
-    console.error("❌ [Outbox Worker] Polling error:", err.message);
   } finally {
     isRunning = false;
   }
 };
 
+// Start Worker
 export const startOutboxWorker = () => {
-  console.log("🚀 [Outbox Worker] Transactional Outbox Background Worker started");
-  // Poll every 10 seconds
+  console.log("🚀 Outbox Worker Started");
   setInterval(pollOutbox, 10000);
 };

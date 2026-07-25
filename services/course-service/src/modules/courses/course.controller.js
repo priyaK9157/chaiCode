@@ -110,3 +110,17 @@ export const getEnrolledCourses = async (req, res, next) => {
     next(err);
   }
 };
+
+export const subscribeFcm = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ message: "Token is required" });
+    }
+    const fcmToken = await courseService.saveFcmToken(req.user.id, token);
+    console.log(`📡 [FCM] Saved registration token for user: ${req.user.id}`);
+    res.status(201).json({ message: "Subscribed successfully", fcmToken });
+  } catch (err) {
+    next(err);
+  }
+};

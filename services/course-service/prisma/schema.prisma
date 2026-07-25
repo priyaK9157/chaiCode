@@ -59,3 +59,10 @@ model OutboxEvent {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model FcmToken {
+  id        String   @id @default(uuid())
+  userId    String   // Student ID or Instructor ID
+  token     String   @unique
+  createdAt DateTime @default(now())
+}

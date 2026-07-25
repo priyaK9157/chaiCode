@@ -117,6 +117,19 @@ export const getCourseById = async (id) => {
   return course;
 };
 
+export const saveFcmToken = (userId, token) => {
+  return prisma.fcmToken.upsert({
+    where: { token },
+    update: {
+      userId
+    },
+    create: {
+      userId,
+      token
+    }
+  });
+};
+
 export const getInstructorCourses = (instructorId) => {
   return prisma.course.findMany({
     where: { instructorId },
