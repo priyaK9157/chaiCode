@@ -26,7 +26,7 @@ import PaymentCancel from "./components/PaymentCancel";
 import InstructorCourseDetails from "./components/InstructorCourseDetails";
 import Checkout from "./components/Checkout";
 import Chatbot from "./components/Chatbot";
-import { requestForToken } from "./firebase";
+import { requestForToken, onMessageListener } from "./firebase";
 
 function App() {
   const location = useLocation();
@@ -74,6 +74,17 @@ function App() {
       return () => clearTimeout(timer);
     }
   }, [location.pathname]);
+
+  // Listen for foreground FCM push notifications and show system/browser alerts
+  useEffect(() => {
+    const unsubscribe = onMessageListener((payload) => {
+      console.log("📡 [FCM App] Received foreground message:", payload);
+      alert(`🔔 ${payload.notification.title}\n\n${payload.notification.body}`);
+    });
+    return () => {
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
+  }, []);
 
   return (
     <section className=''>

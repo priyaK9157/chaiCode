@@ -61,9 +61,8 @@ export const requestForToken = async (apiBaseUrl, jwtToken) => {
 };
 
 // Listen to foreground notifications
-export const onMessageListener = () =>
-  new Promise((resolve) => {
-    onMessage(messaging, (payload) => {
-      resolve(payload);
-    });
+export const onMessageListener = (callback) => {
+  return onMessage(messaging, (payload) => {
+    callback(payload);
   });
+};
